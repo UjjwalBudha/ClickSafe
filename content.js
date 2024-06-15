@@ -186,31 +186,48 @@ function getAllUrls() {
   return urls;
 }
 
-// Function to fetch URLs and send to FastAPI server
+// Function to fetch URLs and send to FastAPI server with caching
 async function fetchAndSendUrls() {
   try {
     const urls = getAllUrls();
-    const response = await fetch('https://j431gdqv0f.execute-api.us-east-1.amazonaws.com/stage/urlcheck', {
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Methods": "*"
-      },
-      body: JSON.stringify({ urls })
-    });
-    const data = await response.json();
-    console.log('Validated URLs:', data);
-    // Store the validated URLs locally
-    chrome.storage.local.set({ validatedUrls: data });
 
+    // Retrieve cached URLs
+    const cachedUrls = await new Promise((resolve) => {
+      chrome.storage.local.get('validatedUrls', (data) => {
+        resolve(data.validatedUrls || {});
+      });
+    });
+
+    // Separate URLs into cached and new
+    const newUrls = urls.filter(url => !cachedUrls[url]);
+    const validatedUrls = { ...cachedUrls };
+
+    // Fetch new URLs if any
+    if (newUrls.length > 0) {
+      const response = await fetch('https://j431gdqv0f.execute-api.us-east-1.amazonaws.com/stage/urlcheck', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Methods": "*"
+        },
+        body: JSON.stringify({ urls: newUrls })
+      });
+      const data = await response.json();
+      Object.assign(validatedUrls, data);
+
+      // Store the validated URLs locally
+      chrome.storage.local.set({ validatedUrls: validatedUrls });
+    }
+
+    console.log('Validated URLs:', validatedUrls);
     // Update the status bar
-    updateStatusBar(data);
+    updateStatusBar(validatedUrls);
 
     // Check for malicious URLs and notify
-    if (Object.values(data).some(isMalicious => isMalicious)) {
-      const maliciousUrls = Object.keys(data).filter(url => data[url]);
+    if (Object.values(validatedUrls).some(isMalicious => isMalicious)) {
+      const maliciousUrls = Object.keys(validatedUrls).filter(url => validatedUrls[url]);
       chrome.runtime.sendMessage({
         action: 'notify',
         urls: maliciousUrls
@@ -239,4 +256,3 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     fetchAndSendUrls();
   }
 });
-
