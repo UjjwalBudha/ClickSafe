@@ -203,6 +203,15 @@ async function fetchAndSendUrls() {
 
     // Update the status bar
     updateStatusBar(data);
+
+    // Check for malicious URLs and notify
+    if (Object.values(data).some(isMalicious => isMalicious)) {
+      const maliciousUrls = Object.keys(data).filter(url => data[url]);
+      chrome.runtime.sendMessage({
+        action: 'notify',
+        urls: maliciousUrls
+      });
+    }
   } catch (error) {
     console.error('Error fetching and sending URLs:', error);
   }
