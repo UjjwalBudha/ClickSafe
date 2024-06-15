@@ -15,6 +15,9 @@ async function fetchThreatLevel(url) {
 
 // Function to create and show the threat level indicator
 function showThreatLevelIndicator(threatLevel, element) {
+  // Remove any existing indicator
+  removeThreatLevelIndicator();
+
   let indicator = document.createElement('div');
   indicator.id = 'threat-level-indicator';
 
@@ -32,13 +35,13 @@ function showThreatLevelIndicator(threatLevel, element) {
 
   indicator.style.backgroundColor = color;
   indicator.textContent = symbol;
-  indicator.style.fontSize = '20px'; // Make the identifier smaller
+  indicator.style.fontSize = '16px'; // Adjusted the font size for better visibility
 
   // Position the indicator
   let rect = element.getBoundingClientRect();
   indicator.style.position = 'absolute';
-  indicator.style.top = `${rect.top + window.scrollY - 26}px`; // Position just above the link
-  indicator.style.left = `${rect.left + window.scrollX + 20}px`; // Align with the start of the link
+  indicator.style.top = `${rect.top + window.scrollY - 30}px`; // Position just above the link
+  indicator.style.left = `${rect.left + window.scrollX}px`; // Align with the start of the link
   indicator.style.width = '24px';
   indicator.style.height = '24px';
   indicator.style.borderRadius = '50%';
@@ -64,7 +67,6 @@ function showThreatLevelIndicator(threatLevel, element) {
 
   // Modify link styling similar to Grammarly's underline approach
   element.style.borderBottom = `2px dotted ${color}`;
-  element.parentElement.insertBefore(indicator, element.nextSibling); // Insert indicator after link
 }
 
 // Function to remove the threat level indicator and border
@@ -79,6 +81,45 @@ function removeThreatLevelIndicator() {
   links.forEach(link => {
     link.style.borderBottom = 'none';
   });
+}
+
+// Function to create and update the status bar
+function updateStatusBar(validatedUrls) {
+  let maliciousCount = Object.values(validatedUrls).filter(isMalicious => isMalicious).length;
+  let totalCount = Object.keys(validatedUrls).length;
+  let percentage = Math.round((maliciousCount / totalCount) * 100);
+
+  let barContainer = document.getElementById('status-bar-container');
+  let bar = document.getElementById('status-bar');
+  if (!barContainer) {
+    barContainer = document.createElement('div');
+    barContainer.id = 'status-bar-container';
+    barContainer.style.position = 'fixed';
+    barContainer.style.top = '0';
+    barContainer.style.left = '0';
+    barContainer.style.width = '100%';
+    barContainer.style.height = '4px';
+    barContainer.style.zIndex = '1000';
+    barContainer.style.backgroundColor = '#ddd'; // Default background color
+    
+    bar = document.createElement('div');
+    bar.id = 'status-bar';
+    bar.style.height = '100%';
+    barContainer.appendChild(bar);
+    document.body.appendChild(barContainer);
+  }
+
+  bar.style.width = `${percentage}%`;
+
+  if (maliciousCount === 0) {
+    bar.style.backgroundColor = '#00A651'; // Green for no malicious links
+  } else if (maliciousCount > 0 && maliciousCount < 4) {
+    bar.style.backgroundColor = '#1E90FF'; // Blue for less than 4 malicious links
+  } else {
+    bar.style.backgroundColor = '#ED5565'; // Red for 4 or more malicious links
+  }
+
+  bar.style.backgroundColor = bar.style.backgroundColor || '#ddd'; // Ensure it has a default color
 }
 
 // Event listener for mouse over
@@ -141,13 +182,6 @@ function getAllUrls() {
   return urls;
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'fetchUrls') {
-    const urls = getAllUrls();
-    sendResponse({ urls });
-  }
-});
-
 // Function to fetch URLs and send to FastAPI server
 async function fetchAndSendUrls() {
   try {
@@ -166,6 +200,9 @@ async function fetchAndSendUrls() {
     console.log('Validated URLs:', data);
     // Store the validated URLs locally
     chrome.storage.local.set({ validatedUrls: data });
+
+    // Update the status bar
+    updateStatusBar(data);
   } catch (error) {
     console.error('Error fetching and sending URLs:', error);
   }
