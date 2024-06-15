@@ -58,10 +58,6 @@ Please adhere to the following code style guidelines:
 - **CSS**: Use BEM naming conventions for CSS classes.
 - **HTML**: Ensure HTML is properly indented and formatted.
 
-### Code of Conduct
-
-By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
-
 ## Development Setup
 
 To set up a local development environment, follow these steps:

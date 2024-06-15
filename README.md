@@ -29,6 +29,21 @@ ClickSafe is a Chrome extension designed to enhance your online security by anal
 - **Scanned URLs**: Click "Show Scanned URLs" in the popup to view all scanned URLs.
 - **Malicious URLs**: Click "Show Malicious URLs" in the popup to view all malicious URLs detected.
 
+## Demo
+
+![Demo 0](demo/demo0.png)
+*Initial setup and activation of ClickSafe.*
+
+![Demo 1](demo/demo1.png)
+*Status bar indicating overall page safety.*
+
+![Demo 2](demo/demo2.png)
+*Notification showing a detected malicious URL.*
+
+## Test URL
+
+To see ClickSafe in action, visit our [test website](http://threatswebsitelinks.com.s3-website-us-east-1.amazonaws.com/).
+
 ## File Structure
 
 - **manifest.json**: Contains the extension's configuration and permissions.
