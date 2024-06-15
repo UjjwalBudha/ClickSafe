@@ -4,13 +4,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const malwareUrlList = document.getElementById('malwareUrlList');
   const toggleScannedUrlsButton = document.getElementById('toggleScannedUrlsButton');
   const toggleMalwareUrlsButton = document.getElementById('toggleMalwareUrlsButton');
+  const notificationBell = document.getElementById('notificationBell');
 
-  // Get the current state of protection
-  chrome.storage.sync.get('protectionEnabled', data => {
-    console.log('Protection enabled state:', data.protectionEnabled);
-    toggle.checked = data.protectionEnabled;
+  // Get the current state of protection and notification settings
+  chrome.storage.sync.get(['protectionEnabled', 'notificationsEnabled'], data => {
+    toggle.checked = data.protectionEnabled !== undefined ? data.protectionEnabled : true;
     if (toggle.checked) {
       fetchUrlsAndDisplay();
+    }
+    if (data.notificationsEnabled !== undefined ? data.notificationsEnabled : true) {
+      notificationBell.src = 'icons/bell_on.png';
+      notificationBell.classList.add('active');
+    } else {
+      notificationBell.src = 'icons/bell_off.png';
+      notificationBell.classList.remove('active');
     }
   });
 
@@ -18,13 +25,29 @@ document.addEventListener('DOMContentLoaded', () => {
   toggle.addEventListener('change', () => {
     const protectionEnabled = toggle.checked;
     chrome.storage.sync.set({ protectionEnabled }, () => {
-      console.log('Protection toggled to:', protectionEnabled);
       if (protectionEnabled) {
         fetchUrlsAndDisplay();
       } else {
         scannedUrlList.innerHTML = '';
         malwareUrlList.innerHTML = '';
       }
+    });
+  });
+
+  // Add event listener for notification bell
+  notificationBell.addEventListener('click', () => {
+    chrome.storage.sync.get('notificationsEnabled', data => {
+      const notificationsEnabled = data.notificationsEnabled !== undefined ? data.notificationsEnabled : true;
+      const newNotificationsEnabled = !notificationsEnabled;
+      chrome.storage.sync.set({ notificationsEnabled: newNotificationsEnabled }, () => {
+        if (newNotificationsEnabled) {
+          notificationBell.src = 'icons/bell_on.png';
+          notificationBell.classList.add('active');
+        } else {
+          notificationBell.src = 'icons/bell_off.png';
+          notificationBell.classList.remove('active');
+        }
+      });
     });
   });
 
@@ -44,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, { action: 'fetchUrls' }, (response) => {
           if (response && response.urls) {
-            console.log('Fetched URLs:', response.urls);
             resolve(response.urls);
           } else {
             reject('No URLs found.');
@@ -56,7 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Function to send URLs to FastAPI server for validation
   function validateUrls(urls) {
-    console.log('Validating URLs:', urls);
     return fetch('https://j431gdqv0f.execute-api.us-east-1.amazonaws.com/stage/urlcheck', {
       method: 'POST',
       headers: {
@@ -74,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchUrls()
       .then(validateUrls)
       .then(validatedUrls => {
-        console.log('Validated URLs:', validatedUrls);
         updateScannedUrls(validatedUrls);
         displayMaliciousUrls(validatedUrls);
       })

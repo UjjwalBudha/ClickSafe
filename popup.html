@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <link rel="stylesheet" type="text/css" href="styles.css">
   <title>ClickSafe</title>
@@ -11,12 +10,11 @@
       width: 320px;
       background-color: #f4f4f9;
     }
-
     .header {
       text-align: center;
       margin-bottom: 20px;
+      position: relative;
     }
-
     #extension-title {
       font-size: 32px;
       letter-spacing: 0.5px;
@@ -25,15 +23,12 @@
       justify-content: center;
       align-items: center;
     }
-
     .cs-letters {
       color: #ff0000;
     }
-
     .other-letters {
       color: #008000;
     }
-
     .box {
       background: #fff;
       padding: 15px;
@@ -41,32 +36,27 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       margin-bottom: 20px;
     }
-
     .toggle-switch {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 10px 0;
     }
-
     .toggle-switch label {
       font-size: 16px;
       font-weight: bold;
     }
-
     .description-box {
       background: #fff;
       padding: 15px;
       border-radius: 5px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-
     .description {
       font-size: 14px;
       color: #555;
       margin: 0;
     }
-
     input[type="checkbox"] {
       width: 40px;
       height: 20px;
@@ -79,11 +69,9 @@
       cursor: pointer;
       transition: background-color 0.2s;
     }
-
     input[type="checkbox"]:checked {
       background-color: #4caf50;
     }
-
     input[type="checkbox"]::before {
       content: '';
       width: 18px;
@@ -95,26 +83,21 @@
       left: 1px;
       transition: transform 0.2s;
     }
-
     input[type="checkbox"]:checked::before {
       transform: translateX(20px);
     }
-
     .url-list-container {
       display: flex;
       justify-content: space-between;
       margin-bottom: 20px;
     }
-
     .url-box {
       flex: 1;
       margin-right: 10px;
     }
-
     .url-box:last-child {
       margin-right: 0;
     }
-
     .url-list {
       max-height: 200px;
       overflow-y: auto;
@@ -125,7 +108,6 @@
       white-space: nowrap;
       display: none; /* Hidden by default */
     }
-
     .url-list p {
       font-size: 12px;
       word-wrap: break-word;
@@ -133,7 +115,6 @@
       text-overflow: ellipsis;
       max-width: 100%;
     }
-
     .toggle-urls-button {
       display: block;
       margin: 10px 0;
@@ -145,31 +126,38 @@
       cursor: pointer;
       white-space: nowrap;
     }
-
     .scanned-url {
       color: #008000;
     }
-
     .malware-url {
       color: #ff0000;
     }
-
     .scanned-heading {
       color: #008000;
     }
-
     .malware-heading {
       color: #ff0000;
     }
-
     #logo {
       margin-top: 10px;
       width: 50px;
       height: auto;
     }
+    .notification-bell {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+    }
+    .notification-bell img {
+      width: 24px;
+      height: 24px;
+    }
+    .notification-bell img.active {
+      filter: brightness(1.5);
+    }
   </style>
 </head>
-
 <body>
   <div class="header">
     <h1 id="extension-title">
@@ -183,6 +171,9 @@
       <span class="other-letters">f</span>
       <span class="other-letters">e</span>
     </h1>
+    <div class="notification-bell">
+      <img src="icons/bell_off.png" id="notificationBell" alt="Notification Bell">
+    </div>
     <img id="logo" src="icons/logo.png" alt="ClickSafe Logo">
   </div>
   <div class="box">
@@ -208,5 +199,4 @@
   </div>
   <script src="popup.js"></script>
 </body>
-
 </html>
