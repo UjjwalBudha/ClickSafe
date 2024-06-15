@@ -42,7 +42,7 @@ ClickSafe is a Chrome extension designed to enhance your online security by anal
 
 ## Test URL
 
-To see ClickSafe in action, visit our [test website](http://clicksafe.ujwal.social/).
+To see ClickSafe in action, visit our [test website](http://threatswebsitelinks.com.s3-website-us-east-1.amazonaws.com/).
 
 ## File Structure
 
