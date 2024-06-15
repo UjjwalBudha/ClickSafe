@@ -105,11 +105,15 @@ function updateStatusBar(validatedUrls) {
     bar = document.createElement('div');
     bar.id = 'status-bar';
     bar.style.height = '100%';
+    bar.style.transition = 'width 2s ease-in-out'; // Add transition for animation
     barContainer.appendChild(bar);
     document.body.appendChild(barContainer);
   }
 
-  bar.style.width = `${percentage}%`;
+  bar.style.width = '0'; // Reset width for animation
+  setTimeout(() => {
+    bar.style.width = `${percentage}%`;
+  }, 0);
 
   if (maliciousCount === 0) {
     bar.style.backgroundColor = '#00A651'; // Green for no malicious links
@@ -235,3 +239,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     fetchAndSendUrls();
   }
 });
+
