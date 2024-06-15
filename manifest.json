@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "ClickSafe",
+  "version": "1.0",
+  "description": "ClickSafe checks if a link is malicious and provides an option to turn protection on or off.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "webNavigation"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "icons/logo.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "128": "icons/logo.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}
