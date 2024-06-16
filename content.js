@@ -112,18 +112,14 @@ function updateStatusBar(validatedUrls) {
 
   bar.style.width = '0'; // Reset width for animation
   setTimeout(() => {
-    bar.style.width = `${percentage}%`;
+    if (maliciousCount > 0) {
+      bar.style.width = `${percentage}%`;
+      bar.style.backgroundColor = '#ED5565'; // Red for malicious links
+    } else {
+      bar.style.width = '100%';
+      bar.style.backgroundColor = '#00A651'; // Green for no malicious links
+    }
   }, 0);
-
-  if (maliciousCount === 0) {
-    bar.style.backgroundColor = '#00A651'; // Green for no malicious links
-  } else if (maliciousCount > 0 && maliciousCount < 4) {
-    bar.style.backgroundColor = '#1E90FF'; // Blue for less than 4 malicious links
-  } else {
-    bar.style.backgroundColor = '#ED5565'; // Red for 4 or more malicious links
-  }
-
-  bar.style.backgroundColor = bar.style.backgroundColor || '#ddd'; // Ensure it has a default color
 }
 
 // Event listener for mouse over
@@ -186,48 +182,29 @@ function getAllUrls() {
   return urls;
 }
 
-// Function to fetch URLs and send to FastAPI server with caching
+// Function to fetch URLs and send to FastAPI server
 async function fetchAndSendUrls() {
   try {
     const urls = getAllUrls();
-
-    // Retrieve cached URLs
-    const cachedUrls = await new Promise((resolve) => {
-      chrome.storage.local.get('validatedUrls', (data) => {
-        resolve(data.validatedUrls || {});
-      });
+    const response = await fetch('https://j431gdqv0f.execute-api.us-east-1.amazonaws.com/stage/urlcheck', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Methods": "*"
+      },
+      body: JSON.stringify({ urls })
     });
+    const data = await response.json();
+    console.log('Validated URLs:', data);
 
-    // Separate URLs into cached and new
-    const newUrls = urls.filter(url => !cachedUrls[url]);
-    const validatedUrls = { ...cachedUrls };
-
-    // Fetch new URLs if any
-    if (newUrls.length > 0) {
-      const response = await fetch('https://j431gdqv0f.execute-api.us-east-1.amazonaws.com/stage/urlcheck', {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Headers": "*",
-          "Access-Control-Allow-Methods": "*"
-        },
-        body: JSON.stringify({ urls: newUrls })
-      });
-      const data = await response.json();
-      Object.assign(validatedUrls, data);
-
-      // Store the validated URLs locally
-      chrome.storage.local.set({ validatedUrls: validatedUrls });
-    }
-
-    console.log('Validated URLs:', validatedUrls);
     // Update the status bar
-    updateStatusBar(validatedUrls);
+    updateStatusBar(data);
 
     // Check for malicious URLs and notify
-    if (Object.values(validatedUrls).some(isMalicious => isMalicious)) {
-      const maliciousUrls = Object.keys(validatedUrls).filter(url => validatedUrls[url]);
+    if (Object.values(data).some(isMalicious => isMalicious)) {
+      const maliciousUrls = Object.keys(data).filter(url => data[url]);
       chrome.runtime.sendMessage({
         action: 'notify',
         urls: maliciousUrls
