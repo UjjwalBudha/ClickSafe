@@ -215,6 +215,9 @@ async function fetchAndSendUrls() {
     // Remove empty or erroneous entries
     delete data[""];
 
+    // Store the validated URLs locally
+    chrome.storage.local.set({ validatedUrls: data });
+
     // Update the status bar
     updateStatusBar(data);
 
