@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+
+# Browser extension
+*.crx
+*.pem
+*.zip
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
