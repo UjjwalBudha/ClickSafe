@@ -9,7 +9,7 @@ ClickSafe is a Chrome extension designed to enhance your online security by anal
 - **Status Bar**: Shows a status bar at the top of the page indicating the overall safety of the links on the page.
 - **Notifications**: Sends desktop notifications when malicious URLs are detected.
 
-## Installation
+## Installation Steps
 
 1. Clone the repository:
     ```sh
